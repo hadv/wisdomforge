@@ -1,4 +1,12 @@
-import { createServer, Tool, z } from '@modelcontextprotocol/sdk';
+#!/usr/bin/env node
+
+import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import {
+  CallToolRequestSchema,
+  ListToolsRequestSchema,
+  Tool,
+} from "@modelcontextprotocol/sdk/types.js";
 import { QdrantClient } from '@qdrant/js-client-rest';
 import dotenv from 'dotenv';
 import { generateEmbedding, VECTOR_SIZE } from './embedding-utils';
@@ -22,62 +30,33 @@ const qdrantClient = new QdrantClient({
 // Collection name
 const collectionName = process.env.QDRANT_COLLECTION || 'documents';
 
-// Initialize server
-async function main() {
-  // Define the retrieval tool
-  const retrieveFromQdrant: Tool = {
-    name: 'retrieve_from_qdrant',
-    description: 'Retrieve information from Qdrant vector database based on semantic similarity',
-    inputSchema: z.object({
-      query: z.string().describe('The search query for retrieval'),
-      limit: z.number().default(3).describe('Number of results to retrieve'),
-      scoreThreshold: z.number().default(0.7).describe('Minimum similarity score threshold (0-1)'),
-    }),
-    execute: async (params: { query: string; limit: number; scoreThreshold: number }): Promise<QdrantSearchResponse> => {
-      try {
-        const { query, limit, scoreThreshold } = params;
-        
-        // Convert query to vector embedding
-        const queryEmbedding = await generateEmbedding(query);
-        
-        // Search Qdrant
-        const searchResults = await qdrantClient.search(collectionName, {
-          vector: queryEmbedding,
-          limit: limit,
-          score_threshold: scoreThreshold,
-          with_payload: true,
-        }) as QdrantSearchResult[];
-        
-        // Format results
-        const formattedResults: FormattedResult[] = searchResults.map((result: QdrantSearchResult) => ({
-          text: result.payload?.text || '',
-          metadata: {
-            source: result.payload?.source || '',
-            score: result.score,
-          },
-        }));
-        
-        return {
-          results: formattedResults,
-        };
-      } catch (error) {
-        console.error('Error during vector search:', error);
-        throw new Error(`Failed to retrieve from Qdrant: ${error}`);
-      }
-    }
-  };
+// Define the retrieval tool
+const RETRIEVAL_TOOL: Tool = {
+  name: 'retrieve_from_qdrant',
+  description: 'Retrieve information from Qdrant vector database based on semantic similarity',
+  inputSchema: {
+    type: "object",
+    properties: {
+      query: { type: "string", description: "The search query for retrieval" },
+      limit: { type: "number", default: 3, description: "Number of results to retrieve" },
+      scoreThreshold: { type: "number", default: 0.7, description: "Minimum similarity score threshold (0-1)" },
+    },
+    required: ["query"],
+  },
+};
 
-  // Start the server
-  const server = createServer({
-    tools: [retrieveFromQdrant],
-  });
-
-  const port = parseInt(process.env.PORT || '3000', 10);
-  
-  server.listen(port, () => {
-    console.log(`Qdrant MCP Server running on port ${port}`);
-  });
-}
+// Server setup
+const server = new Server(
+  {
+    name: "qdrant-retrieval-server",
+    version: "1.0.0",
+  },
+  {
+    capabilities: {
+      tools: {},
+    },
+  },
+);
 
 // Check if Qdrant collection exists, create if it doesn't
 async function ensureCollection() {
@@ -103,10 +82,76 @@ async function ensureCollection() {
   }
 }
 
-// Run the server
-ensureCollection()
-  .then(() => main())
-  .catch(error => {
-    console.error('Failed to start server:', error);
-    process.exit(1);
-  }); 
+// Request handlers
+server.setRequestHandler(ListToolsRequestSchema, async () => ({
+  tools: [RETRIEVAL_TOOL],
+}));
+
+server.setRequestHandler(CallToolRequestSchema, async (request) => {
+  const { name, arguments: args } = request.params;
+  
+  if (name === 'retrieve_from_qdrant') {
+    const { query, limit = 3, scoreThreshold = 0.7 } = args as Record<string, any>;
+    
+    try {
+      // Convert query to vector embedding
+      const queryEmbedding = await generateEmbedding(query);
+      
+      // Search Qdrant
+      const searchResults = await qdrantClient.search(collectionName, {
+        vector: queryEmbedding,
+        limit: limit,
+        score_threshold: scoreThreshold,
+        with_payload: true,
+      }) as QdrantSearchResult[];
+      
+      // Format results
+      const formattedResults: FormattedResult[] = searchResults.map((result: QdrantSearchResult) => ({
+        text: result.payload?.text || '',
+        metadata: {
+          source: result.payload?.source || '',
+          score: result.score,
+        },
+      }));
+      
+      return {
+        content: [
+          { type: "text", text: JSON.stringify({ results: formattedResults }) }
+        ],
+      };
+    } catch (error) {
+      console.error('Error during vector search:', error);
+      return {
+        content: [{ type: "text", text: `Failed to retrieve from Qdrant: ${error}` }],
+        isError: true,
+      };
+    }
+  } else {
+    return {
+      content: [{ type: "text", text: `Unknown tool: ${name}` }],
+      isError: true,
+    };
+  }
+});
+
+// Server startup
+async function runServer() {
+  await ensureCollection();
+  
+  const transport = new StdioServerTransport();
+  await server.connect(transport);
+  
+  console.error("Qdrant Retrieval Server running on stdio");
+  
+  // Optional HTTP server
+  if (process.env.HTTP_SERVER === "true") {
+    const port = parseInt(process.env.PORT || '3000', 10);
+    // HTTP server code would go here
+    console.log(`Qdrant MCP Server running on port ${port}`);
+  }
+}
+
+runServer().catch((error) => {
+  console.error('Fatal error running server:', error);
+  process.exit(1);
+}); 
