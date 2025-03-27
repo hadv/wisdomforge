@@ -11,6 +11,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.8.0",
     "@qdrant/js-client-rest": "^1.13.0",
+    "chromadb": "^2.1.0",
     "dotenv": "^16.4.7"
   },
   "devDependencies": {
