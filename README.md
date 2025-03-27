@@ -121,6 +121,55 @@ To use a different embedding model, modify the `generateEmbedding` function in `
 
 To modify the search response format, update the type definitions in `qdrant-types.ts` and adjust the formatting in the `execute` function of the `retrieveFromQdrant` tool.
 
+## Vector Database Support
+
+This MCP server supports two vector databases:
+
+1. **Qdrant** (default) - A high-performance vector database
+2. **Chroma** - A simpler, lightweight vector database
+
+You can switch between these databases by setting the `DATABASE_TYPE` environment variable to either `qdrant` or `chroma`.
+
+### Setting up Qdrant
+
+For Qdrant, you need to:
+
+1. Run a Qdrant server instance
+2. Configure the connection in your .env file:
+   ```
+   DATABASE_TYPE=qdrant
+   QDRANT_URL=http://localhost:6333
+   QDRANT_API_KEY=your_api_key_if_needed
+   COLLECTION_NAME=your_collection_name
+   ```
+
+### Setting up Chroma
+
+For Chroma, you need to:
+
+1. Run a Chroma server instance or use the in-memory version
+2. Configure the connection in your .env file:
+   ```
+   DATABASE_TYPE=chroma
+   CHROMA_URL=http://localhost:8000
+   COLLECTION_NAME=your_collection_name
+   ```
+
+### Running Chroma Server
+
+You can run a Chroma server using Docker:
+
+```bash
+docker run -p 8000:8000 chromadb/chroma
+```
+
+Or install it directly:
+
+```bash
+pip install chromadb
+chromadb run --host 0.0.0.0 --port 8000
+```
+
 ## License
 
 This MCP server is licensed under the MIT License. 

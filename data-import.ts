@@ -1,44 +1,90 @@
 /**
- * Data Import Script for Qdrant MCP Server
+ * Data Import Script for Vector Database MCP Server
  * 
- * This script provides utilities for importing documents into Qdrant.
+ * This script provides utilities for importing documents into the selected vector database.
  * Usage: ts-node data-import.ts --file=your-data.json
  */
 
-import { QdrantClient } from '@qdrant/js-client-rest';
-import { generateEmbedding, VECTOR_SIZE } from './embedding-utils';
-import { QdrantDocument } from './qdrant-types';
+import { generateEmbedding } from './embedding-utils';
+import { DatabaseService, DatabaseType } from './db-service';
+import { FormattedResult } from './qdrant-types';
+import { ChromaDocument } from './chroma-types';
 import * as fs from 'fs';
 import * as path from 'path';
 import dotenv from 'dotenv';
+import { QdrantClient } from '@qdrant/js-client-rest';
+import { ChromaClient, IEmbeddingFunction } from 'chromadb';
 
 // Load environment variables
 dotenv.config();
 
-// Qdrant client setup
+// Custom embedding function for Chroma
+class CustomEmbeddingFunction implements IEmbeddingFunction {
+  async generate(texts: string[]): Promise<number[][]> {
+    const embeddings: number[][] = [];
+    for (const text of texts) {
+      const embedding = await generateEmbedding(text);
+      embeddings.push(embedding);
+    }
+    return embeddings;
+  }
+}
+
+// Determine which database to use
+const dbType = (process.env.DATABASE_TYPE?.toLowerCase() === 'chroma')
+  ? DatabaseType.CHROMA
+  : DatabaseType.QDRANT;
+
+// Collection name
+const collectionName = process.env.COLLECTION_NAME || 'documents';
+
+// Database clients
 const qdrantClient = new QdrantClient({
   url: process.env.QDRANT_URL || 'http://localhost:6333',
   apiKey: process.env.QDRANT_API_KEY,
 });
 
-// Collection name
-const collectionName = process.env.QDRANT_COLLECTION || 'documents';
+const chromaClient = new ChromaClient({
+  path: process.env.CHROMA_URL || 'http://localhost:8000'
+});
+
+// Create embedding function instance
+const embeddingFunction = new CustomEmbeddingFunction();
 
 /**
- * Import documents from a JSON file into Qdrant
+ * Import documents from a JSON file into vector database
  * 
  * @param filePath Path to the JSON file with documents
  */
 async function importFromFile(filePath: string) {
   try {
-    console.log(`Importing documents from ${filePath}...`);
+    console.log(`Importing documents to ${dbType} from ${filePath}...`);
     
     // Read and parse the file
     const fileContent = fs.readFileSync(filePath, 'utf-8');
-    const documents: QdrantDocument[] = JSON.parse(fileContent);
+    const documents = JSON.parse(fileContent);
     
+    // Process based on database type
+    if (dbType === DatabaseType.QDRANT) {
+      await importToQdrant(documents);
+    } else {
+      await importToChroma(documents);
+    }
+    
+    console.log(`Import completed! ${documents.length} documents processed.`);
+  } catch (error) {
+    console.error('Error importing documents:', error);
+    process.exit(1);
+  }
+}
+
+/**
+ * Import documents to Qdrant
+ */
+async function importToQdrant(documents: any[]) {
+  try {
     // Ensure collection exists
-    await ensureCollection();
+    await ensureQdrantCollection();
     
     // Process documents in batches
     const BATCH_SIZE = 10;
@@ -48,7 +94,7 @@ async function importFromFile(filePath: string) {
       batches.push(documents.slice(i, i + BATCH_SIZE));
     }
     
-    console.log(`Processing ${documents.length} documents in ${batches.length} batches...`);
+    console.log(`Processing ${documents.length} documents in ${batches.length} batches for Qdrant...`);
     
     // Process each batch
     for (let i = 0; i < batches.length; i++) {
@@ -78,36 +124,120 @@ async function importFromFile(filePath: string) {
       
       console.log(`Batch ${i + 1} processed successfully.`);
     }
-    
-    console.log(`Import completed! ${documents.length} documents processed.`);
   } catch (error) {
-    console.error('Error importing documents:', error);
-    process.exit(1);
+    console.error('Error importing to Qdrant:', error);
+    throw error;
+  }
+}
+
+/**
+ * Import documents to Chroma
+ */
+async function importToChroma(documents: any[]) {
+  try {
+    // Ensure collection exists
+    const collection = await ensureChromaCollection();
+    
+    // Process documents in batches
+    const BATCH_SIZE = 10;
+    const batches = [];
+    
+    for (let i = 0; i < documents.length; i += BATCH_SIZE) {
+      batches.push(documents.slice(i, i + BATCH_SIZE));
+    }
+    
+    console.log(`Processing ${documents.length} documents in ${batches.length} batches for Chroma...`);
+    
+    // Process each batch
+    for (let i = 0; i < batches.length; i++) {
+      const batch = batches[i];
+      console.log(`Processing batch ${i + 1}/${batches.length} (${batch.length} documents)...`);
+      
+      // Prepare data for Chroma
+      const ids: string[] = [];
+      const texts: string[] = [];
+      const metadatas: any[] = [];
+      
+      // Process documents
+      batch.forEach((doc, index) => {
+        ids.push(doc.id);
+        texts.push(doc.text);
+        metadatas.push({
+          source: doc.source,
+          ...(doc.metadata || {}),
+        });
+      });
+      
+      // Insert batch into Chroma
+      await collection.add({
+        ids,
+        documents: texts,
+        metadatas
+      });
+      
+      console.log(`Batch ${i + 1} processed successfully.`);
+    }
+  } catch (error) {
+    console.error('Error importing to Chroma:', error);
+    throw error;
   }
 }
 
 /**
  * Ensure Qdrant collection exists
  */
-async function ensureCollection() {
+async function ensureQdrantCollection() {
   try {
     const collections = await qdrantClient.getCollections();
     const collectionExists = collections.collections.some(c => c.name === collectionName);
     
     if (!collectionExists) {
-      console.log(`Creating collection ${collectionName}...`);
+      console.log(`Creating Qdrant collection ${collectionName}...`);
       await qdrantClient.createCollection(collectionName, {
         vectors: {
-          size: VECTOR_SIZE,
+          size: 1536, // OpenAI embedding size
           distance: 'Cosine',
         }
       });
-      console.log(`Collection ${collectionName} created.`);
+      console.log(`Qdrant collection ${collectionName} created.`);
     } else {
-      console.log(`Collection ${collectionName} already exists.`);
+      console.log(`Qdrant collection ${collectionName} already exists.`);
+    }
+    
+    return qdrantClient;
+  } catch (error) {
+    console.error('Error ensuring Qdrant collection exists:', error);
+    throw error;
+  }
+}
+
+/**
+ * Ensure Chroma collection exists
+ */
+async function ensureChromaCollection() {
+  try {
+    const collections = await chromaClient.listCollections();
+    const collectionExists = collections.some((collection: any) => collection.name === collectionName);
+    
+    if (!collectionExists) {
+      console.log(`Creating Chroma collection ${collectionName}...`);
+      const collection = await chromaClient.createCollection({
+        name: collectionName,
+        metadata: { 'description': 'MCP Server collection' },
+        embeddingFunction: embeddingFunction
+      });
+      console.log(`Chroma collection ${collectionName} created.`);
+      return collection;
+    } else {
+      console.log(`Chroma collection ${collectionName} already exists.`);
+      const collection = await chromaClient.getCollection({
+        name: collectionName,
+        embeddingFunction: embeddingFunction
+      });
+      return collection;
     }
   } catch (error) {
-    console.error('Error ensuring collection exists:', error);
+    console.error('Error ensuring Chroma collection exists:', error);
     throw error;
   }
 }
