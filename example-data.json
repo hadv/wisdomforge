@@ -1,0 +1,47 @@
+[
+  {
+    "id": "doc1",
+    "text": "Qdrant is a vector similarity search engine. It provides a production-ready service with a convenient API to store, search, and manage points—vectors with an additional payload. Qdrant is tailored to extended filtering support. It makes it useful for all sorts of neural network or semantic-based matching, faceted search, and other applications.",
+    "source": "https://qdrant.tech/",
+    "metadata": {
+      "category": "vector-database",
+      "type": "documentation"
+    }
+  },
+  {
+    "id": "doc2",
+    "text": "Model Context Protocol (MCP) is a new protocol specification for communication between large language models (LLMs) and external tools. It defines a shared interface contract for LLMs to call tools using a structured format.",
+    "source": "https://github.com/modelcontextprotocol/servers",
+    "metadata": {
+      "category": "protocol",
+      "type": "documentation"
+    }
+  },
+  {
+    "id": "doc3",
+    "text": "Retrieval-Augmented Generation (RAG) is a technique that enhances Large Language Models by retrieving relevant information from external knowledge sources during generation. This approach provides models with up-to-date, domain-specific information without requiring retraining.",
+    "source": "https://research-papers.org/rag-overview",
+    "metadata": {
+      "category": "ai-technique",
+      "type": "research"
+    }
+  },
+  {
+    "id": "doc4",
+    "text": "Claude is an AI assistant created by Anthropic to be helpful, harmless, and honest. Claude can process text and images, perform complex tasks, and engage in natural, open-ended conversations.",
+    "source": "https://www.anthropic.com/claude",
+    "metadata": {
+      "category": "ai-model",
+      "type": "product"
+    }
+  },
+  {
+    "id": "doc5",
+    "text": "Vector embeddings are numerical representations of data (like text, images, or audio) that capture semantic meaning. They allow machines to understand similarities between different pieces of content by measuring the distance between vectors in high-dimensional space.",
+    "source": "https://ai-glossary.com/vector-embeddings",
+    "metadata": {
+      "category": "ai-technique",
+      "type": "definition"
+    }
+  }
+] 
