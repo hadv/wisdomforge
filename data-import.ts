@@ -14,10 +14,10 @@ import * as path from 'path';
 import dotenv from 'dotenv';
 import { QdrantClient } from '@qdrant/js-client-rest';
 import { ChromaClient, IEmbeddingFunction } from 'chromadb';
-import { v4 as uuidv4 } from 'uuid';
-import axios from 'axios';
-import { Collection, IncludeEnum } from 'chromadb';
-import pdf from 'pdf-parse';
+import { v4 as _uuidv4 } from 'uuid';
+import _axios from 'axios';
+import { Collection as _Collection, IncludeEnum as _IncludeEnum } from 'chromadb';
+import _pdf from 'pdf-parse';
 import { DatabaseService as _DatabaseService } from './db-service';
 import { FormattedResult as _FormattedResult } from './qdrant-types';
 import { ChromaDocument as _ChromaDocument } from './chroma-types';
@@ -286,7 +286,7 @@ if (require.main === module) {
 }
 
 // Process files one by one
-const processFiles = async (dirPath: string) => {
+const _processFiles = async (dirPath: string) => {
   const files = fs.readdirSync(dirPath);
   
   for (const [_index, file] of files.entries()) {
