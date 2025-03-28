@@ -5,22 +5,52 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
+  Tool,
 } from "@modelcontextprotocol/sdk/types.js";
 import dotenv from 'dotenv';
-import { DatabaseService } from './src/core/db-service';
-import { KnowledgeManagementTools } from './src/core/knowledge-management-tools';
+import { DatabaseService } from './core/db-service';
 
 // Load environment variables
 dotenv.config();
 
+interface DomainTool extends Tool {
+  handler: (args?: any) => Promise<any>;
+}
+
+class LegacyRetrievalTools {
+  constructor(private dbService: DatabaseService) {}
+
+  getTools(): DomainTool[] {
+    return [
+      {
+        name: 'retrieve_information',
+        description: 'Retrieve information from vector database based on semantic similarity',
+        inputSchema: {
+          type: "object",
+          properties: {
+            query: { type: "string", description: "The search query for retrieval" },
+            limit: { type: "number", default: 3, description: "Number of results to retrieve" },
+            scoreThreshold: { type: "number", default: 0.7, description: "Minimum similarity score threshold (0-1)" },
+          },
+          required: ["query"],
+        },
+        handler: async ({ query, limit = 3, scoreThreshold = 0.7 }) => {
+          const formattedResults = await this.dbService.search(query, limit, scoreThreshold);
+          return { results: formattedResults };
+        }
+      }
+    ];
+  }
+}
+
 // Service initialization
 const dbService = new DatabaseService();
-const knowledgeTools = new KnowledgeManagementTools(dbService);
+const legacyTools = new LegacyRetrievalTools(dbService);
 
 // Server setup
 const server = new Server(
   {
-    name: "knowledge-management-server",
+    name: "legacy-retrieval-server",
     version: "1.0.0",
   },
   {
@@ -32,14 +62,14 @@ const server = new Server(
 
 // Request handlers
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
-  tools: knowledgeTools.getTools(),
+  tools: legacyTools.getTools(),
 }));
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
   
   try {
-    const tool = knowledgeTools.getTools().find(t => t.name === name);
+    const tool = legacyTools.getTools().find(t => t.name === name);
     if (!tool) {
       return {
         content: [{ type: "text", text: `Unknown tool: ${name}` }],
@@ -68,12 +98,12 @@ async function runServer() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
   
-  console.error("Knowledge Management Server running on stdio");
+  console.error("Legacy Retrieval Server running on stdio");
   
   // Optional HTTP server
   if (process.env.HTTP_SERVER === "true") {
     const port = parseInt(process.env.PORT || '3000', 10);
-    console.log(`Knowledge Management MCP Server running on port ${port}`);
+    console.log(`Legacy Retrieval MCP Server running on port ${port}`);
   }
 }
 

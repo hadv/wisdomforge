@@ -6,12 +6,15 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "ts-node index.ts",
+    "start:legacy": "node dist/legacy-retrieval-server.js",
+    "dev": "ts-node --esm index.ts",
+    "dev:legacy": "ts-node --esm src/legacy-retrieval-server.ts",
     "import": "ts-node src/scripts/data-import.ts",
     "upload": "ts-node src/scripts/document-uploader.ts",
-    "test": "jest",
+    "test": "jest --config jest.config.cjs",
     "test:watch": "jest --watch",
-    "lint": "eslint . --ext .ts"
+    "lint": "eslint . --ext .ts",
+    "store-doc": "ts-node src/scripts/store-documentation.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.0",
