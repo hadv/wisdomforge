@@ -1,4 +1,4 @@
-import { DatabaseService, DatabaseType as _DatabaseType } from '../db-service';
+import { DatabaseService } from '../db-service';
 import * as embeddingUtils from '../embedding-utils';
 
 // Mock the embedding-utils module
