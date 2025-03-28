@@ -46,6 +46,38 @@ A Model Context Protocol (MCP) server implementation for RAG (Retrieval-Augmente
    npm start
    ```
 
+## Testing
+
+Run the test suite with:
+
+```bash
+npm test
+```
+
+Run tests in watch mode during development:
+
+```bash
+npm run test:watch
+```
+
+Run linting checks:
+
+```bash
+npm run lint
+```
+
+## Continuous Integration
+
+This project uses GitHub Actions for continuous integration:
+
+- **CI Workflow**: Runs linting, builds the project, and executes tests on Node.js 18.x and 20.x.
+- **Docker Workflow**: Builds and pushes Docker images to GitHub Container Registry.
+
+The CI workflows are automatically triggered on:
+- Push to main/master branches
+- Pull requests to main/master branches
+- Tag creation (for Docker image releases)
+
 ## Docker Deployment
 
 Build and run with Docker:
