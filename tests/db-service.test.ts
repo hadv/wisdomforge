@@ -1,11 +1,11 @@
-import { DatabaseService } from '../db-service';
-import * as embeddingUtils from '../embedding-utils';
+import { DatabaseService } from '../src/core/db-service';
+import * as embeddingUtils from '../src/core/embedding-utils';
 
 // Mock the embedding-utils module
-jest.mock('../embedding-utils', () => ({
+jest.mock('../src/core/embedding-utils', () => ({
   generateEmbedding: jest.fn(),
   VECTOR_SIZE: 768,
-  cosineSimilarity: jest.requireActual('../embedding-utils').cosineSimilarity
+  cosineSimilarity: jest.requireActual('../src/core/embedding-utils').cosineSimilarity
 }));
 
 // Mock QdrantClient

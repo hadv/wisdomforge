@@ -1,4 +1,4 @@
-import { generateEmbedding, cosineSimilarity, VECTOR_SIZE } from '../embedding-utils';
+import { generateEmbedding, cosineSimilarity, VECTOR_SIZE } from '../src/core/embedding-utils';
 
 describe('Embedding Utilities', () => {
   describe('generateEmbedding', () => {

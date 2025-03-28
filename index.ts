@@ -8,7 +8,7 @@ import {
   Tool,
 } from "@modelcontextprotocol/sdk/types.js";
 import dotenv from 'dotenv';
-import { DatabaseService } from './db-service';
+import { DatabaseService } from './src/core/db-service';
 
 // Load environment variables
 dotenv.config();

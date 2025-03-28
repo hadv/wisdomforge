@@ -5,8 +5,8 @@
  * Usage: ts-node data-import.ts --file=your-data.json
  */
 
-import { generateEmbedding } from './embedding-utils';
-import { DatabaseType } from './db-service';
+import { generateEmbedding } from '../core/embedding-utils';
+import { DatabaseType } from '../core/db-service';
 import * as fs from 'fs';
 import * as path from 'path';
 import dotenv from 'dotenv';

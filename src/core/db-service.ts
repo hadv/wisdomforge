@@ -1,7 +1,7 @@
 import { QdrantClient } from '@qdrant/js-client-rest';
 import { ChromaClient, Collection, IncludeEnum, IEmbeddingFunction } from 'chromadb';
 import { generateEmbedding, VECTOR_SIZE } from './embedding-utils';
-import { FormattedResult } from './qdrant-types';
+import { FormattedResult } from '../types/qdrant-types';
 import dotenv from 'dotenv';
 
 // Load environment variables
