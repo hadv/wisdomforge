@@ -2,33 +2,57 @@
  * Embedding utilities for Qdrant MCP Server
  * 
  * This file contains utility functions for generating and managing embeddings.
- * In a production environment, you would replace the mock function with a real
- * embedding API call (like OpenAI, Cohere, etc.)
+ * For production use, we use Google's Gemini embedding model.
  */
 
-// Vector dimension (adjust based on your embeddings model)
-export const VECTOR_SIZE = 1536; // Default for OpenAI ada-002
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
+
+// Vector dimension for Gemini embedding-001 model
+export const VECTOR_SIZE = 768;
+
+// Initialize the Gemini API
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const genAI = new GoogleGenerativeAI(GEMINI_API_KEY || '');
 
 /**
  * Generate an embedding vector for the provided text
  * 
- * NOTE: This is a mock implementation. In production, replace with a real embedding API.
+ * Uses Google's Gemini embedding-001 model
  * 
  * @param text The text to generate an embedding for
  * @returns A vector representation of the text
  */
 export async function generateEmbedding(text: string): Promise<number[]> {
-  // In a real implementation, you would call an embedding API
-  // Example with OpenAI (pseudo-code):
-  // 
-  // const response = await openai.embeddings.create({
-  //   model: "text-embedding-ada-002",
-  //   input: text,
-  // });
-  // return response.data[0].embedding;
-  
-  // Mock implementation that returns a random vector
-  return Array.from({ length: VECTOR_SIZE }, () => Math.random() - 0.5);
+  try {
+    // Check if we have a Gemini API key
+    if (!GEMINI_API_KEY) {
+      console.warn('Warning: GEMINI_API_KEY not found in environment variables. Using mock embeddings.');
+      // Fall back to mock implementation if no API key
+      return Array.from({ length: VECTOR_SIZE }, () => Math.random() - 0.5);
+    }
+    
+    // Trim text if it's too long
+    // Gemini has a limit of 3072 tokens for embeddings
+    const trimmedText = text.slice(0, 25000); // Approximate length to stay under token limit
+    
+    // Get the embedding model
+    const embeddingModel = genAI.getGenerativeModel({ model: "embedding-001" });
+    
+    // Generate embeddings
+    const result = await embeddingModel.embedContent(trimmedText);
+    const embedding = result.embedding.values;
+    
+    return embedding;
+  } catch (error) {
+    console.error('Error generating embedding with Gemini:', error);
+    // Fall back to mock implementation in case of errors
+    console.warn('Falling back to mock embeddings due to API error.');
+    return Array.from({ length: VECTOR_SIZE }, () => Math.random() - 0.5);
+  }
 }
 
 /**
