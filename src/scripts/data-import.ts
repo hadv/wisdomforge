@@ -5,10 +5,8 @@
  * Usage: ts-node data-import.ts --file=your-data.json
  */
 
-import { generateEmbedding } from './embedding-utils';
-import { DatabaseService, DatabaseType } from './db-service';
-import { FormattedResult } from './qdrant-types';
-import { ChromaDocument } from './chroma-types';
+import { generateEmbedding } from '../core/embedding-utils';
+import { DatabaseType } from '../core/db-service';
 import * as fs from 'fs';
 import * as path from 'path';
 import dotenv from 'dotenv';
@@ -159,7 +157,7 @@ async function importToChroma(documents: any[]) {
       const metadatas: any[] = [];
       
       // Process documents
-      batch.forEach((doc, index) => {
+      batch.forEach((doc, _index) => {
         ids.push(doc.id);
         texts.push(doc.text);
         metadatas.push({
