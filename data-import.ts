@@ -14,6 +14,13 @@ import * as path from 'path';
 import dotenv from 'dotenv';
 import { QdrantClient } from '@qdrant/js-client-rest';
 import { ChromaClient, IEmbeddingFunction } from 'chromadb';
+import { v4 as uuidv4 } from 'uuid';
+import axios from 'axios';
+import { Collection, IncludeEnum } from 'chromadb';
+import pdf from 'pdf-parse';
+import { DatabaseService as _DatabaseService } from './db-service';
+import { FormattedResult as _FormattedResult } from './qdrant-types';
+import { ChromaDocument as _ChromaDocument } from './chroma-types';
 
 // Load environment variables
 dotenv.config();
@@ -276,4 +283,20 @@ if (require.main === module) {
     console.error('Import failed:', error);
     process.exit(1);
   });
-} 
+}
+
+// Process files one by one
+const processFiles = async (dirPath: string) => {
+  const files = fs.readdirSync(dirPath);
+  
+  for (const [_index, file] of files.entries()) {
+    const filePath = path.join(dirPath, file);
+    
+    // Skip directories and non-PDF files
+    if (fs.statSync(filePath).isDirectory() || !filePath.toLowerCase().endsWith('.pdf')) {
+      continue;
+    }
+    
+    // ... existing code ...
+  }
+}; 

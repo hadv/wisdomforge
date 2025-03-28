@@ -14,7 +14,7 @@ import * as path from 'path';
 import dotenv from 'dotenv';
 import { v4 as uuidv4 } from 'uuid';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-// @ts-ignore
+// @ts-expect-error No type definitions available for pdf-parse
 import pdfParse from 'pdf-parse';
 
 // Load environment variables
