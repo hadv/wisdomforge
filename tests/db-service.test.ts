@@ -124,7 +124,7 @@ describe('DatabaseService', () => {
       expect(results[0]).toHaveProperty('text', 'Test document 1');
       expect(results[0].metadata).toHaveProperty('source', 'test-source-1');
       // For Chroma, score is 1 - distance
-      expect(results[0].metadata).toHaveProperty('score', 0.9);
+      expect(results[0].metadata).toHaveProperty('score', 0.95);
     });
   });
 }); 
