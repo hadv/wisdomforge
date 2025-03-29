@@ -1,11 +1,17 @@
 import { DatabaseService } from '../src/core/db-service';
-import * as embeddingUtils from '../src/core/embedding-utils';
+import * as embeddingUtils from '../src/utils/embedding';
+import { VECTOR_SIZE } from '../src/configs/qdrant';
 
 // Mock the embedding-utils module
-jest.mock('../src/core/embedding-utils', () => ({
+jest.mock('../src/utils/embedding', () => ({
   generateEmbedding: jest.fn(),
-  VECTOR_SIZE: 768,
-  cosineSimilarity: jest.requireActual('../src/core/embedding-utils').cosineSimilarity
+}));
+
+// Mock config module
+jest.mock('../src/configs/qdrant', () => ({
+  VECTOR_SIZE: 384,
+  QDRANT_URL: 'http://mock-qdrant:6333',
+  QDRANT_API_KEY: 'mock-api-key'
 }));
 
 // Mock QdrantClient
@@ -59,7 +65,7 @@ beforeEach(() => {
   process.env = { ...originalEnv };
   // Mock generateEmbedding to return a vector of the correct size
   (embeddingUtils.generateEmbedding as jest.Mock).mockResolvedValue(
-    Array(embeddingUtils.VECTOR_SIZE).fill(0.1)
+    Array(VECTOR_SIZE).fill(0.1)
   );
 });
 
