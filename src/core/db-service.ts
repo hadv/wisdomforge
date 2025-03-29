@@ -40,10 +40,14 @@ export class DatabaseService {
       ? DatabaseType.CHROMA
       : DatabaseType.QDRANT;
     
-    this.collectionName = process.env.COLLECTION_NAME || 'documents';
+    this.collectionName = process.env.COLLECTION_NAME || 'vito';
     this.embeddingFunction = new CustomEmbeddingFunction();
     
     console.log(`Using database type: ${this.dbType}`);
+  }
+
+  getDbType(): DatabaseType {
+    return this.dbType;
   }
 
   async initialize(): Promise<void> {
@@ -88,7 +92,6 @@ export class DatabaseService {
     });
 
     try {
-      // List collections to check if ours exists
       const collections = await this.chromaClient.listCollections();
       const collectionExists = collections.some((collection: any) => collection.name === this.collectionName);
       
@@ -114,7 +117,6 @@ export class DatabaseService {
   }
 
   async search(query: string, limit: number = 3, scoreThreshold: number = 0.7): Promise<FormattedResult[]> {
-    // Generate embedding for query
     const queryEmbedding = await generateEmbedding(query);
     
     if (this.dbType === DatabaseType.QDRANT) {
@@ -141,6 +143,7 @@ export class DatabaseService {
       metadata: {
         source: String(result.payload?.source || ''),
         score: result.score,
+        ...result.payload
       },
     }));
   }
@@ -156,44 +159,23 @@ export class DatabaseService {
       include: [IncludeEnum.Documents, IncludeEnum.Metadatas, IncludeEnum.Distances]
     });
     
-    // Convert results to FormattedResult format
     const formattedResults: FormattedResult[] = [];
     
     if (searchResults.documents && searchResults.documents.length > 0 && 
         searchResults.metadatas && searchResults.distances) {
-      // First array is for the first query
       const docs = searchResults.documents[0] || [];
       const metas = searchResults.metadatas[0] || [];
       const distances = searchResults.distances[0] || [];
       
       for (let i = 0; i < docs.length; i++) {
-        // In Chroma, lower distance is better, so convert to a similarity score (1 - distance)
-        // Assuming distances are normalized between 0-1
         const similarityScore = 1 - (distances[i] || 0);
+        const docText = docs[i] !== null && docs[i] !== undefined ? String(docs[i]) : '';
+        const metaObj = metas[i] && typeof metas[i] === 'object' ? metas[i] as Record<string, any> : {};
         
-        // Handle documents - ensure we have a valid string
-        let docText = '';
-        if (docs[i] !== null && docs[i] !== undefined) {
-          docText = String(docs[i]);
-        }
-        
-        // Handle metadata - ensure we have a valid object
-        let metaObj: Record<string, any> = {};
-        let source = '';
-        
-        if (metas[i] && typeof metas[i] === 'object') {
-          metaObj = metas[i] as Record<string, any>;
-          // Ensure source is a string
-          if (metaObj.source !== undefined) {
-            source = String(metaObj.source);
-          }
-        }
-        
-        // Construct the formatted result with proper types
         formattedResults.push({
           text: docText,
           metadata: {
-            source: source,
+            source: String(metaObj.source || ''),
             score: similarityScore,
             ...metaObj
           }
@@ -202,5 +184,62 @@ export class DatabaseService {
     }
     
     return formattedResults;
+  }
+
+  async storeDomainKnowledge(
+    text: string,
+    domain: string,
+    metadata: Record<string, any> = {}
+  ): Promise<string> {
+    const pointId = crypto.randomUUID();
+    const timestamp = new Date().toISOString();
+    
+    const enhancedMetadata = {
+      ...metadata,
+      domain,
+      timestamp,
+      type: 'domain_knowledge',
+      version: 1
+    };
+
+    if (this.dbType === DatabaseType.QDRANT) {
+      await this.storeDocumentQdrant(text, enhancedMetadata);
+    } else {
+      await this.storeDocumentChroma(text, enhancedMetadata);
+    }
+
+    return pointId;
+  }
+
+  private async storeDocumentQdrant(text: string, metadata: Record<string, any>): Promise<void> {
+    if (!this.qdrantClient) {
+      throw new Error('Qdrant client not initialized');
+    }
+
+    const embedding = await generateEmbedding(text);
+    const pointId = crypto.randomUUID();
+
+    await this.qdrantClient.upsert(this.collectionName, {
+      points: [{
+        id: pointId,
+        vector: embedding,
+        payload: {
+          text,
+          ...metadata
+        }
+      }]
+    });
+  }
+
+  private async storeDocumentChroma(text: string, metadata: Record<string, any>): Promise<void> {
+    if (!this.chromaCollection) {
+      throw new Error('Chroma collection not initialized');
+    }
+
+    await this.chromaCollection.add({
+      ids: [crypto.randomUUID()],
+      documents: [text],
+      metadatas: [metadata]
+    });
   }
 } 

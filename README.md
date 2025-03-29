@@ -1,207 +1,236 @@
-# Qdrant MCP Server for RAG
+# Qdrant MCP Server
 
-A Model Context Protocol (MCP) server implementation for RAG (Retrieval-Augmented Generation) using Qdrant vector database.
+A server implementation that supports both Qdrant and Chroma vector databases for storing and retrieving domain knowledge.
 
 ## Features
 
-* **Vector Search**: Perform semantic search over your vector embeddings stored in Qdrant.
-* **Customizable Parameters**: Configure search parameters like limit and score threshold.
-* **Ready for LLM Integration**: Seamlessly integrates with Claude Desktop and other MCP-compatible tools.
-
-## Tools
-
-* **retrieve_from_qdrant**  
-   * Perform vector similarity search against a Qdrant collection.  
-   * Inputs:  
-     * `query` (string): The search query for retrieval.  
-     * `limit` (number, optional): Number of results to retrieve (default: 3).  
-     * `scoreThreshold` (number, optional): Minimum similarity score threshold (default: 0.7).
+- Support for both Qdrant and Chroma vector databases
+- Configurable database selection via environment variables
+- Domain knowledge storage and retrieval
+- Documentation file storage with metadata
+- Support for PDF and TXT file formats
 
 ## Prerequisites
 
-* Node.js v16+
-* Qdrant instance (local or cloud)
-* Optional: OpenAI API key (for production embedding generation)
+- Node.js 20.x or later (LTS recommended)
+- npm 10.x or later
+- Qdrant or Chroma vector database
 
-## Setup
+## Installation
 
-1. Clone this repository
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd qdrant-mcp-server
+```
+
 2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Configure environment variables in `.env`:
-   ```
-   QDRANT_URL=http://localhost:6333
-   QDRANT_COLLECTION=documents
-   QDRANT_API_KEY=your_api_key_if_needed
-   PORT=3000
-   ```
-4. Build the project:
-   ```bash
-   npm run build
-   ```
-5. Start the server:
-   ```bash
-   npm start
-   ```
+```bash
+npm install
+```
 
-## Testing
+3. Create a `.env` file in the root directory based on the `.env.example` template:
+```bash
+cp .env.example .env
+```
 
-Run the test suite with:
+4. Update the `.env` file with your own settings:
+```env
+DATABASE_TYPE=qdrant
+QDRANT_URL=https://your-qdrant-instance.example.com:6333
+QDRANT_API_KEY=your_api_key
+COLLECTION_NAME=your_collection_name
+GEMINI_API_KEY=your_gemini_api_key
+```
+
+5. Build the project:
+```bash
+npm run build
+```
+
+## AI IDE Integration
+
+### Cursor AI IDE
+Create the script `run-cursor-mcp.sh` in the project root:
+
+```bash
+#!/bin/zsh
+cd /path/to/your/project
+source ~/.zshrc
+nvm use --lts
+
+# Let the app load environment variables from .env file
+node dist/index.js
+```
+
+Make the script executable:
+```bash
+chmod +x run-cursor-mcp.sh
+```
+
+Add this configuration to your `~/.cursor/mcp.json` or `.cursor/mcp.json` file:
+```json
+{
+  "mcpServers": {
+    "qdrant-retrieval": {
+      "command": "/path/to/your/project/run-cursor-mcp.sh",
+      "args": []
+    }
+  }
+}
+```
+
+### Claude Desktop
+Add this configuration in Claude's settings:
+```json
+{
+  "processes": {
+    "knowledge_server": {
+      "command": "/path/to/your/project/run-cursor-mcp.sh",
+      "args": []
+    }
+  },
+  "tools": [
+    {
+      "name": "store_knowledge",
+      "description": "Store domain-specific knowledge in a vector database",
+      "provider": "process",
+      "process": "knowledge_server"
+    },
+    {
+      "name": "retrieve_knowledge_context",
+      "description": "Retrieve relevant domain knowledge from a vector database",
+      "provider": "process",
+      "process": "knowledge_server"
+    }
+  ]
+}
+```
+
+## Usage
+
+### Starting the Server
+
+```bash
+npm start
+```
+
+For development with auto-reload:
+```bash
+npm run dev
+```
+
+### Storing Documentation
+
+The server includes a script to store documentation files (PDF and TXT) with metadata:
+
+```bash
+npm run store-doc <path-to-your-file>
+```
+
+Example:
+```bash
+# Store a PDF file
+npm run store-doc docs/manual.pdf
+
+# Store a text file
+npm run store-doc docs/readme.txt
+```
+
+The script will:
+- Extract content from the file (text from PDF or plain text)
+- Store the content with metadata including:
+  - Source: "documentation"
+  - File name and extension
+  - File size
+  - Last modified date
+  - Creation date
+  - Content type
+
+### API Endpoints
+
+#### Store Domain Knowledge
+
+```http
+POST /api/store
+Content-Type: application/json
+
+{
+  "content": "Your domain knowledge content here",
+  "source": "your-source",
+  "metadata": {
+    "key": "value"
+  }
+}
+```
+
+#### Query Domain Knowledge
+
+```http
+POST /api/query
+Content-Type: application/json
+
+{
+  "query": "Your search query here",
+  "limit": 5
+}
+```
+
+## Development
+
+### Running Tests
 
 ```bash
 npm test
 ```
 
-Run tests in watch mode during development:
+### Building the Project
 
 ```bash
-npm run test:watch
+npm run build
 ```
 
-Run linting checks:
+### Linting
 
 ```bash
 npm run lint
 ```
 
-## Continuous Integration
+## Project Structure
 
-This project uses GitHub Actions for continuous integration:
-
-- **CI Workflow**: Runs linting, builds the project, and executes tests on Node.js 18.x and 20.x.
-- **Docker Workflow**: Builds and pushes Docker images to GitHub Container Registry.
-
-The CI workflows are automatically triggered on:
-- Push to main/master branches
-- Pull requests to main/master branches
-- Tag creation (for Docker image releases)
-
-## Docker Deployment
-
-Build and run with Docker:
-
-```bash
-# Build the image
-docker build -t mcp/qdrant-server .
-
-# Run the container
-docker run -p 3000:3000 \
-  -e QDRANT_URL=http://your-qdrant-instance:6333 \
-  -e QDRANT_COLLECTION=documents \
-  -e QDRANT_API_KEY=your_api_key_if_needed \
-  mcp/qdrant-server
+```
+src/
+├── core/
+│   ├── db-service.ts      # Database service implementation
+│   └── embedding-utils.ts # Embedding utilities
+├── scripts/
+│   └── store-documentation.ts  # Documentation storage script
+└── index.ts              # Main server file
 ```
 
-## Usage with Claude Desktop
+## Using with Remote Qdrant
 
-Add this to your `claude_desktop_config.json`:
+When using with a remote Qdrant instance (like Qdrant Cloud):
 
-```json
-{
-  "mcpServers": {
-    "qdrant-retrieval": {
-      "command": "docker",
-      "args": [
-        "run", 
-        "-i", 
-        "--rm", 
-        "-e", "QDRANT_URL", 
-        "-e", "QDRANT_COLLECTION", 
-        "-e", "QDRANT_API_KEY", 
-        "mcp/qdrant-server"
-      ],
-      "env": {
-        "QDRANT_URL": "http://your-qdrant-instance:6333",
-        "QDRANT_COLLECTION": "documents",
-        "QDRANT_API_KEY": "your_api_key_if_needed"
-      }
-    }
-  }
-}
+1. Ensure your `.env` has the correct URL with port number:
+```
+QDRANT_URL=https://your-instance-id.region.gcp.cloud.qdrant.io:6333
 ```
 
-Alternatively, for NPM usage:
-
-```json
-{
-  "mcpServers": {
-    "qdrant-retrieval": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "qdrant-mcp-server"
-      ],
-      "env": {
-        "QDRANT_URL": "http://your-qdrant-instance:6333",
-        "QDRANT_COLLECTION": "documents",
-        "QDRANT_API_KEY": "your_api_key_if_needed"
-      }
-    }
-  }
-}
+2. Set your API key:
+```
+QDRANT_API_KEY=your_qdrant_api_key
 ```
 
-## Customization
+## Troubleshooting
 
-### Using a Different Embedding Model
+If you encounter issues:
 
-To use a different embedding model, modify the `generateEmbedding` function in `embedding-utils.ts`. Replace the mock implementation with your preferred embedding API call.
-
-### Extending the Search Response
-
-To modify the search response format, update the type definitions in `qdrant-types.ts` and adjust the formatting in the `execute` function of the `retrieveFromQdrant` tool.
-
-## Vector Database Support
-
-This MCP server supports two vector databases:
-
-1. **Qdrant** (default) - A high-performance vector database
-2. **Chroma** - A simpler, lightweight vector database
-
-You can switch between these databases by setting the `DATABASE_TYPE` environment variable to either `qdrant` or `chroma`.
-
-### Setting up Qdrant
-
-For Qdrant, you need to:
-
-1. Run a Qdrant server instance
-2. Configure the connection in your .env file:
-   ```
-   DATABASE_TYPE=qdrant
-   QDRANT_URL=http://localhost:6333
-   QDRANT_API_KEY=your_api_key_if_needed
-   COLLECTION_NAME=your_collection_name
-   ```
-
-### Setting up Chroma
-
-For Chroma, you need to:
-
-1. Run a Chroma server instance or use the in-memory version
-2. Configure the connection in your .env file:
-   ```
-   DATABASE_TYPE=chroma
-   CHROMA_URL=http://localhost:8000
-   COLLECTION_NAME=your_collection_name
-   ```
-
-### Running Chroma Server
-
-You can run a Chroma server using Docker:
-
-```bash
-docker run -p 8000:8000 chromadb/chroma
-```
-
-Or install it directly:
-
-```bash
-pip install chromadb
-chromadb run --host 0.0.0.0 --port 8000
-```
+1. Make sure you're using Node.js LTS version (`nvm use --lts`)
+2. Verify your environment variables are correct
+3. Check Qdrant/Chroma connectivity
+4. Ensure the GEMINI_API_KEY is valid if using Gemini for embeddings
 
 ## License
 
-This MCP server is licensed under the MIT License. 
+MIT
