@@ -1,0 +1,8 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+should run `nvm use --lts` first when run npm or node
+

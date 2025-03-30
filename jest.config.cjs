@@ -17,5 +17,12 @@ module.exports = {
       diagnostics: false,
     }],
   },
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
+    '^@core/(.*)$': '<rootDir>/src/core/$1',
+    '^@utils/(.*)$': '<rootDir>/src/utils/$1',
+    '^@configs/(.*)$': '<rootDir>/src/configs/$1',
+    '^@types/(.*)$': '<rootDir>/src/types/$1'
+  },
   setupFiles: ['dotenv/config'],
 }; 

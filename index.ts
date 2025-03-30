@@ -7,8 +7,8 @@ import {
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import dotenv from 'dotenv';
-import { DatabaseService } from './src/core/db-service';
-import { KnowledgeManagementTools } from './src/core/knowledge-management-tools';
+import { DatabaseService } from '@core/database-service';
+import { KnowledgeManagementTools } from '@core/knowledge-management-tools';
 
 // Load environment variables
 dotenv.config();

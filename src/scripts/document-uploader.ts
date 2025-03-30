@@ -13,9 +13,9 @@ import * as path from 'path';
 import dotenv from 'dotenv';
 import { v4 as uuidv4 } from 'uuid';
 import pdfParse from 'pdf-parse';
-import { generateEmbedding } from '../utils/embedding';
-import { VECTOR_SIZE, QDRANT_URL, QDRANT_API_KEY } from '../configs/qdrant';
-import { COLLECTION_NAME } from '../configs/common';
+import { generateEmbedding } from '@utils/embedding';
+import { VECTOR_SIZE, QDRANT_URL, QDRANT_API_KEY } from '@configs/qdrant';
+import { COLLECTION_NAME } from '@configs/common';
 
 // Load environment variables
 dotenv.config();
