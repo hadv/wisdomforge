@@ -69,6 +69,7 @@ async function runServer() {
   await server.connect(transport);
   
   console.error("Knowledge Management Server running on stdio");
+  console.log("Knowledge Management Server started successfully");
   
   // Optional HTTP server
   if (process.env.HTTP_SERVER === "true") {
