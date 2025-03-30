@@ -1,4 +1,4 @@
-import { DatabaseService } from '../core/db-service';
+import { DatabaseService } from '@core/database-service';
 import fs from 'fs/promises';
 import path from 'path';
 import pdf from 'pdf-parse';

@@ -1,5 +1,5 @@
 import { Tool } from '@modelcontextprotocol/sdk/types.js';
-import { DatabaseService } from './db-service';
+import { DatabaseService } from '@core/database-service';
 
 interface DomainTool extends Tool {
   handler: (args?: any) => Promise<any>;

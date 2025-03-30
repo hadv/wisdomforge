@@ -1,14 +1,14 @@
-import { DatabaseService } from '../src/core/db-service';
-import * as embeddingUtils from '../src/utils/embedding';
-import { VECTOR_SIZE } from '../src/configs/qdrant';
+import { DatabaseService } from '@core/database-service';
+import * as embeddingUtils from '@utils/embedding';
+import { VECTOR_SIZE } from '@configs/qdrant';
 
 // Mock the embedding-utils module
-jest.mock('../src/utils/embedding', () => ({
+jest.mock('@utils/embedding', () => ({
   generateEmbedding: jest.fn(),
 }));
 
 // Mock config module
-jest.mock('../src/configs/qdrant', () => ({
+jest.mock('@configs/qdrant', () => ({
   VECTOR_SIZE: 384,
   QDRANT_URL: 'http://mock-qdrant:6333',
   QDRANT_API_KEY: 'mock-api-key'

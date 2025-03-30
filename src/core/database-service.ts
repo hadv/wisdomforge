@@ -1,10 +1,10 @@
 import { QdrantClient } from '@qdrant/js-client-rest';
 import { ChromaClient, Collection, IncludeEnum, IEmbeddingFunction } from 'chromadb';
-import { generateEmbedding } from '../utils/embedding';
-import { VECTOR_SIZE, QDRANT_URL, QDRANT_API_KEY } from '../configs/qdrant';
-import { CHROMA_URL } from '../configs/chroma';
-import { COLLECTION_NAME, DatabaseType, DATABASE_TYPE } from '../configs/common';
-import { FormattedResult } from '../types/qdrant';
+import { generateEmbedding } from '@utils/embedding';
+import { VECTOR_SIZE, QDRANT_URL, QDRANT_API_KEY } from '@configs/qdrant';
+import { CHROMA_URL } from '@configs/chroma';
+import { COLLECTION_NAME, DatabaseType, DATABASE_TYPE } from '@configs/common';
+import { FormattedResult } from '@/types/qdrant';
 import dotenv from 'dotenv';
 
 // Load environment variables

@@ -5,10 +5,10 @@
  * Usage: ts-node data-import.ts --file=your-data.json
  */
 
-import { generateEmbedding } from '../utils/embedding';
-import { VECTOR_SIZE, QDRANT_URL, QDRANT_API_KEY } from '../configs/qdrant';
-import { CHROMA_URL } from '../configs/chroma';
-import { COLLECTION_NAME, DatabaseType, DATABASE_TYPE } from '../configs/common';
+import { generateEmbedding } from '@utils/embedding';
+import { VECTOR_SIZE, QDRANT_URL, QDRANT_API_KEY } from '@configs/qdrant';
+import { CHROMA_URL } from '@configs/chroma';
+import { COLLECTION_NAME, DatabaseType, DATABASE_TYPE } from '@configs/common';
 import * as fs from 'fs';
 import * as path from 'path';
 import dotenv from 'dotenv';
