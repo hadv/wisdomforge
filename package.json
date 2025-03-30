@@ -4,9 +4,10 @@
   "description": "MCP server for RAG with Qdrant vector database",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
-    "start": "node dist/index.js",
-    "start:legacy": "node dist/legacy-retrieval-server.js",
+    "build": "tsc && cp src/register-dist.js dist/register.js",
+    "start": "node -r ./dist/register.js dist/src/index.js",
+    "start:dev": "ts-node -r tsconfig-paths/register src/index.ts",
+    "start:legacy": "node -r ./dist/register.js dist/src/legacy-retrieval-server.js",
     "dev": "ts-node --esm index.ts",
     "dev:legacy": "ts-node --esm src/legacy-retrieval-server.ts",
     "import": "ts-node src/scripts/data-import.ts",
@@ -14,7 +15,8 @@
     "test": "jest --config jest.config.cjs",
     "test:watch": "jest --watch",
     "lint": "eslint . --ext .ts",
-    "store-doc": "ts-node src/scripts/store-documentation.ts"
+    "store-doc": "ts-node src/scripts/store-documentation.ts",
+    "jests": "jest"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.8.0",
@@ -22,7 +24,9 @@
     "axios": "^1.8.4",
     "chromadb": "^2.1.0",
     "dotenv": "^16.4.7",
+    "module-alias": "^2.2.3",
     "pdf-parse": "^1.1.1",
+    "tsconfig-paths": "^4.2.0",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
