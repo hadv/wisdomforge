@@ -3,8 +3,11 @@
   "version": "1.0.0",
   "description": "MCP server for RAG with Qdrant vector database",
   "main": "dist/index.js",
+  "bin": {
+    "vito-mcp": "./dist/run.js"
+  },
   "scripts": {
-    "build": "tsc && cp src/register-dist.js dist/register.js",
+    "build": "tsc && cp src/register-dist.js dist/register.js && cp src/run.js dist/ && chmod +x dist/run.js",
     "start": "node -r ./dist/register.js dist/src/index.js",
     "start:dev": "ts-node -r tsconfig-paths/register src/index.ts",
     "start:legacy": "node -r ./dist/register.js dist/src/legacy-retrieval-server.js",
