@@ -54,11 +54,25 @@ mkdir -Force .cursor
   "mcpServers": {
     "qdrant-retrieval": {
       "command": "powershell.exe",
-      "args": ["-ExecutionPolicy", "Bypass", "-File", "C:\\Users\\ASUS\\vito-mcp\\run-cursor-mcp.ps1"]
+      "args": ["-ExecutionPolicy", "Bypass", "-File", "C:\\Users\\ASUS\\vito-mcp\\run-cursor-mcp.ps1"],
+      "env": {
+        "DATABASE_TYPE": "qdrant",
+        "COLLECTION_NAME": "vito",
+        "HTTP_SERVER": "true",
+        "HTTP_PORT": "3000",
+        "QDRANT_URL": "https://your-qdrant-instance.example.com:6333",
+        "QDRANT_API_KEY": "your_api_key"
+      },
+      "url": "http://localhost:3000"
     }
   }
 }
 ```
+
+> **Important Windows Configuration Notes**: 
+> 1. Include environment variables directly in the MCP configuration's `env` section.
+> 2. Use HTTP server mode instead of stdio (`HTTP_SERVER`: "true") as Windows has issues with stdio-based MCP servers.
+> 3. Specify an HTTP port and add the corresponding `url` field to the configuration.
 
 4. If you need to allow PowerShell script execution, run this command as Administrator:
 ```powershell
