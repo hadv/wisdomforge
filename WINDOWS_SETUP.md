@@ -32,9 +32,9 @@ QDRANT_API_KEY=your_api_key
 COLLECTION_NAME=your_collection_name
 ```
 
-5. Build the project:
+5. Build the project using the Windows-specific build command:
 ```powershell
-npm run build
+npm run build:windows
 ```
 
 ## AI IDE Integration
