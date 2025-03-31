@@ -32,3 +32,4 @@ YQUAN
 
 # log
 logs/
+package-lock.json  # Keep package-lock local only
