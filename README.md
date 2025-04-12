@@ -68,34 +68,36 @@ npm run build
 ## AI IDE Integration
 
 ### Cursor AI IDE
-Create the script `run-mcp.sh` in the project root:
-
-```bash
-#!/bin/zsh
-cd /path/to/your/project
-source ~/.zshrc
-nvm use --lts
-
-# Let the app load environment variables from .env file
-node dist/index.js
-```
-
-Make the script executable:
-```bash
-chmod +x run-mcp.sh
-```
-
 Add this configuration to your `~/.cursor/mcp.json` or `.cursor/mcp.json` file:
 ```json
 {
   "mcpServers": {
     "wisdomforge": {
-      "command": "/path/to/your/project/run-mcp.sh",
-      "args": []
+      "command": "npx",
+      "args": [
+        "-y",
+        "@smithery/cli@latest",
+        "run",
+        "@hadv/wisdomforge",
+        "--key",
+        "YOUR_API_KEY",
+        "--config",
+        "{\"database\":{\"type\":\"qdrant\",\"collectionName\":\"YOUR_COLLECTION_NAME\",\"url\":\"YOUR_QDRANT_URL\",\"apiKey\":\"YOUR_QDRANT_API_KEY\"}}",
+        "--transport",
+        "ws"
+      ]
     }
   }
 }
 ```
+
+Replace the following placeholders in the configuration:
+- `YOUR_API_KEY`: Your Smithery API key
+- `YOUR_COLLECTION_NAME`: Your Qdrant collection name
+- `YOUR_QDRANT_URL`: Your Qdrant instance URL
+- `YOUR_QDRANT_API_KEY`: Your Qdrant API key
+
+Note: Make sure you have Node.js installed and `npx` available in your PATH. If you're using nvm, ensure you're using the correct Node.js version by running `nvm use --lts` before starting Cursor.
 
 ### Claude Desktop
 Add this configuration in Claude's settings:
