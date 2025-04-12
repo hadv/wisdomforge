@@ -1,6 +1,6 @@
-import { DatabaseService } from '@core/database-service';
-import * as embeddingUtils from '@utils/embedding';
-import { VECTOR_SIZE } from '@configs/qdrant';
+import { DatabaseService } from '../src/core/database-service';
+import * as embeddingUtils from '../src/utils/embedding';
+import { VECTOR_SIZE } from '../src/configs/qdrant';
 
 // Mock the embedding-utils module
 jest.mock('@utils/embedding', () => ({
@@ -20,16 +20,19 @@ jest.mock('@qdrant/js-client-rest', () => {
     QdrantClient: jest.fn().mockImplementation(() => ({
       getCollections: jest.fn().mockResolvedValue({ collections: [] }),
       createCollection: jest.fn().mockResolvedValue({}),
-      search: jest.fn().mockResolvedValue([
-        {
-          payload: { text: 'Test document 1', source: 'test-source-1' },
-          score: 0.95
-        },
-        {
-          payload: { text: 'Test document 2', source: 'test-source-2' },
-          score: 0.85
-        }
-      ])
+      search: jest.fn().mockImplementation((collectionName, params) => {
+        const results = [
+          {
+            payload: { text: 'Test document 1', source: 'test-source-1' },
+            score: 0.9
+          },
+          {
+            payload: { text: 'Test document 2', source: 'test-source-2' },
+            score: 0.8
+          }
+        ];
+        return Promise.resolve(results.slice(0, params.limit));
+      })
     }))
   };
 });
@@ -37,10 +40,15 @@ jest.mock('@qdrant/js-client-rest', () => {
 // Mock ChromaClient
 jest.mock('chromadb', () => {
   const mockCollection = {
-    query: jest.fn().mockResolvedValue({
-      documents: [['Test document 1', 'Test document 2']],
-      metadatas: [[{ source: 'test-source-1' }, { source: 'test-source-2' }]],
-      distances: [[0.1, 0.2]]
+    query: jest.fn().mockImplementation(({ nResults }) => {
+      const docs = ['Test document 1', 'Test document 2'].slice(0, nResults);
+      const metas = [{ source: 'test-source-1' }, { source: 'test-source-2' }].slice(0, nResults);
+      const distances = [0.1, 0.2].slice(0, nResults);
+      return Promise.resolve({
+        documents: [docs],
+        metadatas: [metas],
+        distances: [distances]
+      });
     })
   };
   
@@ -104,12 +112,12 @@ describe('DatabaseService', () => {
       const dbService = new DatabaseService();
       await dbService.initialize();
       
-      const results = await dbService.search('test query');
+      const results = await dbService.search('test query', 1);
       
-      expect(results).toHaveLength(2);
+      expect(results).toHaveLength(1);
       expect(results[0]).toHaveProperty('text', 'Test document 1');
       expect(results[0].metadata).toHaveProperty('source', 'test-source-1');
-      expect(results[0].metadata).toHaveProperty('score', 0.95);
+      expect(results[0].metadata).toHaveProperty('score', 0.9);
     });
     
     it('should return formatted results for Chroma search', async () => {
@@ -118,13 +126,13 @@ describe('DatabaseService', () => {
       const dbService = new DatabaseService();
       await dbService.initialize();
       
-      const results = await dbService.search('test query');
+      const results = await dbService.search('test query', 1);
       
-      expect(results).toHaveLength(2);
+      expect(results).toHaveLength(1);
       expect(results[0]).toHaveProperty('text', 'Test document 1');
       expect(results[0].metadata).toHaveProperty('source', 'test-source-1');
       // For Chroma, score is 1 - distance
-      expect(results[0].metadata).toHaveProperty('score', 0.95);
+      expect(results[0].metadata).toHaveProperty('score', 0.9);
     });
   });
 }); 

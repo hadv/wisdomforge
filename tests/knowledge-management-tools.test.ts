@@ -1,12 +1,13 @@
-import { KnowledgeManagementTools } from '@core/knowledge-management-tools';
-import { DatabaseService } from '@core/database-service';
+import { KnowledgeManagementTools } from '../src/core/knowledge-management-tools';
+import { DatabaseService } from '../src/core/database-service';
+import { DomainTool } from '../src/core/knowledge-management-tools';
 
 // Mock the DatabaseService
 jest.mock('@core/database-service');
 
 describe('KnowledgeManagementTools', () => {
   let dbServiceMock: jest.Mocked<DatabaseService>;
-  let kmTools: KnowledgeManagementTools;
+  let knowledgeTools: KnowledgeManagementTools;
 
   beforeEach(() => {
     // Create a mock for DatabaseService
@@ -43,12 +44,36 @@ describe('KnowledgeManagementTools', () => {
     dbServiceMock.storeDomainKnowledge = jest.fn().mockResolvedValue('test-doc-id');
     
     // Initialize KnowledgeManagementTools with the mock
-    kmTools = new KnowledgeManagementTools(dbServiceMock);
+    knowledgeTools = new KnowledgeManagementTools(dbServiceMock);
+  });
+
+  describe('getTools', () => {
+    it('should return an array of tools', () => {
+      const tools = knowledgeTools.getTools();
+      expect(Array.isArray(tools)).toBe(true);
+      expect(tools.length).toBeGreaterThan(0);
+    });
+
+    it('should include store_knowledge tool', () => {
+      const tools = knowledgeTools.getTools();
+      const storeKnowledgeTool = tools.find((t: DomainTool) => t.name === 'store_knowledge');
+      expect(storeKnowledgeTool).toBeDefined();
+      expect(storeKnowledgeTool?.description).toBeDefined();
+      expect(storeKnowledgeTool?.inputSchema).toBeDefined();
+    });
+
+    it('should include retrieve_knowledge_context tool', () => {
+      const tools = knowledgeTools.getTools();
+      const retrieveKnowledgeTool = tools.find((t: DomainTool) => t.name === 'retrieve_knowledge_context');
+      expect(retrieveKnowledgeTool).toBeDefined();
+      expect(retrieveKnowledgeTool?.description).toBeDefined();
+      expect(retrieveKnowledgeTool?.inputSchema).toBeDefined();
+    });
   });
 
   describe('store_knowledge tool', () => {
     it('should store knowledge via the database service', async () => {
-      const tools = kmTools.getTools();
+      const tools = knowledgeTools.getTools();
       const storeKnowledgeTool = tools.find(t => t.name === 'store_knowledge');
       
       expect(storeKnowledgeTool).toBeDefined();
@@ -82,7 +107,7 @@ describe('KnowledgeManagementTools', () => {
 
   describe('retrieve_knowledge_context tool', () => {
     it('should retrieve and format knowledge', async () => {
-      const tools = kmTools.getTools();
+      const tools = knowledgeTools.getTools();
       const retrieveKnowledgeTool = tools.find(t => t.name === 'retrieve_knowledge_context');
       
       expect(retrieveKnowledgeTool).toBeDefined();
@@ -101,7 +126,7 @@ describe('KnowledgeManagementTools', () => {
     });
     
     it('should apply filters correctly', async () => {
-      const tools = kmTools.getTools();
+      const tools = knowledgeTools.getTools();
       const retrieveKnowledgeTool = tools.find(t => t.name === 'retrieve_knowledge_context');
       
       const result = await retrieveKnowledgeTool!.handler({

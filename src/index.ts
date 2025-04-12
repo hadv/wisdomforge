@@ -7,8 +7,8 @@ import {
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import dotenv from 'dotenv';
-import { DatabaseService } from '@core/database-service';
-import { KnowledgeManagementTools } from '@core/knowledge-management-tools';
+import { DatabaseService } from './core/database-service';
+import { KnowledgeManagementTools } from './core/knowledge-management-tools';
 
 // Load environment variables
 dotenv.config();
@@ -20,7 +20,7 @@ const knowledgeTools = new KnowledgeManagementTools(dbService);
 // Server setup
 const server = new Server(
   {
-    name: "knowledge-management-server",
+    name: "wisdomforge",
     version: "1.0.0",
   },
   {
@@ -68,14 +68,7 @@ async function runServer() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
   
-  console.error("Knowledge Management Server running on stdio");
-  console.log("Knowledge Management Server started successfully");
-  
-  // Optional HTTP server
-  if (process.env.HTTP_SERVER === "true") {
-    const port = parseInt(process.env.PORT || '3000', 10);
-    console.log(`Knowledge Management MCP Server running on port ${port}`);
-  }
+  console.log("Knowledge Management Tools Server started successfully");
 }
 
 runServer().catch((error) => {

@@ -1,5 +1,5 @@
-import { generateEmbedding, cosineSimilarity } from '@utils/embedding';
-import { VECTOR_SIZE } from '@configs/qdrant';
+import { generateEmbedding, cosineSimilarity } from '../src/utils/embedding';
+import { VECTOR_SIZE } from '../src/configs/qdrant';
 
 describe('Embedding Utilities', () => {
   describe('generateEmbedding', () => {

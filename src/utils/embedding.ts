@@ -7,6 +7,7 @@
 
 import axios from 'axios';
 import { VECTOR_SIZE, QDRANT_URL, QDRANT_API_KEY } from '../configs/qdrant';
+import { EmbeddingResponse } from '../types/declarations/embedding';
 
 /**
  * Generate an embedding vector for the provided text
@@ -24,7 +25,7 @@ export async function generateEmbedding(text: string): Promise<number[]> {
       headers['api-key'] = QDRANT_API_KEY;
     }
 
-    const response = await axios.post(
+    const response = await axios.post<EmbeddingResponse>(
       `${QDRANT_URL}/embeddings`,
       {
         text: text,
