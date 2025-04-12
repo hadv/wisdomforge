@@ -1,16 +1,17 @@
-type: stdio
-configSchema:
-  type: object
-  properties:
-    httpServer:
-      type: boolean
-      description: Whether to run the server in HTTP mode
-      default: false
-    port:
-      type: integer
-      description: Port number for HTTP server
-      default: 3000
-  additionalProperties: false
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    properties:
+      httpServer:
+        type: boolean
+        description: Whether to run the server in HTTP mode
+        default: false
+      port:
+        type: integer
+        description: Port number for HTTP server
+        default: 3000
+    additionalProperties: false
 
 commandFunction: |
   function(config) {
