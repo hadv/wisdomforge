@@ -1,13 +1,13 @@
-import { KnowledgeManagementTools } from '../src/core/knowledge-management-tools';
+import { KnowledgeTools } from '../src/core/knowledge-tools';
 import { DatabaseService } from '../src/core/database-service';
-import { DomainTool } from '../src/core/knowledge-management-tools';
+import { DomainTool } from '../src/core/knowledge-tools';
 
 // Mock the DatabaseService
 jest.mock('@core/database-service');
 
-describe('KnowledgeManagementTools', () => {
+describe('KnowledgeTools', () => {
   let dbServiceMock: jest.Mocked<DatabaseService>;
-  let knowledgeTools: KnowledgeManagementTools;
+  let knowledgeTools: KnowledgeTools;
 
   beforeEach(() => {
     // Create a mock for DatabaseService
@@ -43,8 +43,8 @@ describe('KnowledgeManagementTools', () => {
     
     dbServiceMock.storeDomainKnowledge = jest.fn().mockResolvedValue('test-doc-id');
     
-    // Initialize KnowledgeManagementTools with the mock
-    knowledgeTools = new KnowledgeManagementTools(dbServiceMock);
+    // Initialize KnowledgeTools with the mock
+    knowledgeTools = new KnowledgeTools(dbServiceMock);
   });
 
   describe('getTools', () => {

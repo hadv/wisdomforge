@@ -8,14 +8,14 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import dotenv from 'dotenv';
 import { DatabaseService } from './core/database-service';
-import { KnowledgeManagementTools } from './core/knowledge-management-tools';
+import { KnowledgeTools } from './core/knowledge-tools';
 
 // Load environment variables
 dotenv.config();
 
 // Service initialization
 const dbService = new DatabaseService();
-const knowledgeTools = new KnowledgeManagementTools(dbService);
+const knowledgeTools = new KnowledgeTools(dbService);
 
 // Server setup
 const server = new Server(

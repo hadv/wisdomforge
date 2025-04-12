@@ -9,8 +9,6 @@ A powerful knowledge management system that forges wisdom from experiences, insi
 - Configurable database selection via environment variables
 - Uses Qdrant's built-in FastEmbed for efficient embedding generation
 - Domain knowledge storage and retrieval
-- Documentation file storage with metadata
-- Support for PDF and TXT file formats
 - Deployable to Smithery.ai platform
 
 ## Prerequisites
@@ -23,7 +21,7 @@ A powerful knowledge management system that forges wisdom from experiences, insi
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/hadv/wisdomforge
 cd wisdomforge
 ```
 
@@ -70,7 +68,7 @@ npm run build
 ## AI IDE Integration
 
 ### Cursor AI IDE
-Create the script `run-cursor-mcp.sh` in the project root:
+Create the script `run-mcp.sh` in the project root:
 
 ```bash
 #!/bin/zsh
@@ -84,7 +82,7 @@ node dist/index.js
 
 Make the script executable:
 ```bash
-chmod +x run-cursor-mcp.sh
+chmod +x run-mcp.sh
 ```
 
 Add this configuration to your `~/.cursor/mcp.json` or `.cursor/mcp.json` file:
@@ -92,7 +90,7 @@ Add this configuration to your `~/.cursor/mcp.json` or `.cursor/mcp.json` file:
 {
   "mcpServers": {
     "wisdomforge": {
-      "command": "/path/to/your/project/run-cursor-mcp.sh",
+      "command": "/path/to/your/project/run-mcp.sh",
       "args": []
     }
   }
@@ -105,7 +103,7 @@ Add this configuration in Claude's settings:
 {
   "processes": {
     "knowledge_server": {
-      "command": "/path/to/your/project/run-cursor-mcp.sh",
+      "command": "/path/to/your/project/run-mcp.sh",
       "args": []
     }
   },
@@ -372,17 +370,6 @@ npm run build
 npm run lint
 ```
 
-## Project Structure
-
-```
-src/
-├── core/
-│   ├── db-service.ts      # Database service implementation
-│   └── embedding-utils.ts # Embedding utilities
-├── scripts/
-│   └── store-documentation.ts  # Documentation storage script
-└── index.ts              # Main server file
-```
 
 ## Using with Remote Qdrant
 

@@ -5,7 +5,7 @@ export interface DomainTool extends Tool {
   handler: (args?: any) => Promise<any>;
 }
 
-export class KnowledgeManagementTools {
+export class KnowledgeTools {
   constructor(private dbService: DatabaseService) {}
 
   getTools(): DomainTool[] {
