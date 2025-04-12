@@ -1,29 +1,10 @@
 # Smithery.ai configuration
 startCommand:
   type: stdio
-  configSchema:
-    # JSON Schema defining the configuration options for the MCP.
-    type: object
-    properties:
-      httpServer:
-        type: boolean
-        description: Whether to run the server in HTTP mode
-        default: false
-      port:
-        type: integer
-        description: Port number for HTTP server
-        default: 3000
-    additionalProperties: false
-  commandFunction:
-    # A function that produces the CLI command to start the MCP on stdio.
-    |-
+  configSchema: {}
+  commandFunction: |-
     (config) => ({
       "command": "node",
-      "args": [
-        "dist/index.js"
-      ],
-      "env": {
-        ...(config.httpServer ? { HTTP_SERVER: "true" } : {}),
-        ...(config.port ? { PORT: config.port.toString() } : {})
-      }
+      "args": ["dist/index.js"],
+      "env": {}
     }) 
