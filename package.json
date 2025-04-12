@@ -1,10 +1,10 @@
 {
-  "name": "qdrant-mcp-server",
+  "name": "wisdomforge",
   "version": "1.0.0",
-  "description": "MCP server for RAG with Qdrant vector database",
+  "description": "A powerful knowledge management system that forges wisdom from experiences, insights, and best practices",
   "main": "dist/index.js",
   "bin": {
-    "vito-mcp": "./dist/run.js"
+    "wisdomforge": "./dist/run.js"
   },
   "scripts": {
     "build": "tsc && cp src/register-dist.js dist/register.js && cp src/run.js dist/ && chmod +x dist/run.js",
@@ -19,11 +19,13 @@
     "test": "jest --config jest.config.cjs",
     "test:watch": "jest --watch",
     "lint": "eslint . --ext .ts",
-    "store-doc": "ts-node src/scripts/store-documentation.ts"
+    "store-doc": "ts-node src/scripts/store-documentation.ts",
+    "deploy": "smithery deploy"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.8.0",
     "@qdrant/js-client-rest": "^1.13.0",
+    "@smithery/cli": "^1.0.0",
     "axios": "^1.8.4",
     "chromadb": "^2.1.0",
     "dotenv": "^16.4.7",
@@ -42,5 +44,25 @@
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.3.3"
+  },
+  "smithery": {
+    "type": "mcp-server",
+    "name": "wisdomforge",
+    "description": "A powerful knowledge management system that forges wisdom from experiences, insights, and best practices",
+    "version": "1.0.0",
+    "author": "Your Name",
+    "license": "MIT",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/yourusername/wisdomforge"
+    },
+    "keywords": [
+      "mcp",
+      "knowledge-management",
+      "wisdom",
+      "insights",
+      "best-practices",
+      "vector-database"
+    ]
   }
 }
