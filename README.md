@@ -1,15 +1,17 @@
-# Qdrant MCP Server
+# WisdomForge
 
-A server implementation that supports both Qdrant and Chroma vector databases for storing and retrieving domain knowledge.
+A powerful knowledge management system that forges wisdom from experiences, insights, and best practices. Built with Qdrant vector database for efficient knowledge storage and retrieval.
 
 ## Features
 
-- Support for both Qdrant and Chroma vector databases
+- Intelligent knowledge management and retrieval
+- Support for multiple knowledge types (best practices, lessons learned, insights, experiences)
 - Configurable database selection via environment variables
 - Uses Qdrant's built-in FastEmbed for efficient embedding generation
 - Domain knowledge storage and retrieval
 - Documentation file storage with metadata
 - Support for PDF and TXT file formats
+- Deployable to Smithery.ai platform
 
 ## Prerequisites
 
@@ -22,7 +24,7 @@ A server implementation that supports both Qdrant and Chroma vector databases fo
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd qdrant-mcp-server
+cd wisdomforge
 ```
 
 2. Install dependencies:
@@ -35,12 +37,29 @@ npm install
 cp .env.example .env
 ```
 
-4. Update the `.env` file with your own settings:
+4. Configure your environment variables in the `.env` file:
+
+### Required Environment Variables
+
+#### Database Configuration
+- `DATABASE_TYPE`: Choose your vector database (`qdrant` or `chroma`)
+- `COLLECTION_NAME`: Name of your vector collection
+- `QDRANT_URL`: URL of your Qdrant instance (required if using Qdrant)
+- `QDRANT_API_KEY`: API key for Qdrant (required if using Qdrant)
+- `CHROMA_URL`: URL of your Chroma instance (required if using Chroma)
+
+#### Server Configuration
+- `HTTP_SERVER`: Set to `true` to enable HTTP server mode
+- `PORT`: Port number for local development only (default: 3000). Not used in Smithery cloud deployment.
+
+Example `.env` configuration for Qdrant:
 ```env
 DATABASE_TYPE=qdrant
+COLLECTION_NAME=wisdom_collection
 QDRANT_URL=https://your-qdrant-instance.example.com:6333
 QDRANT_API_KEY=your_api_key
-COLLECTION_NAME=your_collection_name
+HTTP_SERVER=true
+PORT=3000  # Only needed for local development
 ```
 
 5. Build the project:
@@ -72,7 +91,7 @@ Add this configuration to your `~/.cursor/mcp.json` or `.cursor/mcp.json` file:
 ```json
 {
   "mcpServers": {
-    "qdrant-retrieval": {
+    "wisdomforge": {
       "command": "/path/to/your/project/run-cursor-mcp.sh",
       "args": []
     }
@@ -106,6 +125,163 @@ Add this configuration in Claude's settings:
   ]
 }
 ```
+
+## Deployment Options
+
+### Option 1: Local Deployment
+Run the MCP server on your local machine or your own infrastructure:
+
+1. Configure your environment variables in `.env` file
+2. Build the project:
+```bash
+npm run build
+```
+3. Start the server:
+```bash
+npm start
+```
+
+The server will run locally and be accessible at `http://localhost:3000` (or your configured PORT).
+
+### Option 2: Smithery.ai Cloud Deployment
+Deploy the MCP server to Smithery's cloud infrastructure:
+
+1. Create an account on [Smithery.ai](https://smithery.ai)
+2. Install the Smithery CLI:
+```bash
+npm install -g @smithery/cli
+```
+
+3. Login to Smithery:
+```bash
+smithery login
+```
+
+4. Create a new instance for your organization:
+```bash
+smithery create instance wisdomforge
+```
+
+5. Configure your environment variables in Smithery dashboard for your instance:
+   - `DATABASE_TYPE` (default: "qdrant")
+   - `COLLECTION_NAME` (required)
+   - `HTTP_SERVER` (default: "true")
+   - `QDRANT_URL` (required if using Qdrant)
+   - `QDRANT_API_KEY` (required if using Qdrant)
+   - `CHROMA_URL` (required if using Chroma)
+   - Note: `PORT` is not needed for cloud deployment as Smithery handles networking
+
+6. Deploy your server:
+```bash
+npm run deploy
+```
+
+### Choosing Between Local and Cloud Deployment
+
+#### Local Deployment is recommended when:
+- You need full control over the infrastructure
+- You have specific security requirements
+- You want to minimize costs
+- You need to run the server behind a firewall
+- You're in development or testing phase
+
+#### Smithery Cloud Deployment is recommended when:
+- You want managed infrastructure
+- You need automatic scaling
+- You want to avoid server maintenance
+- You need high availability
+- You're in production environment
+
+### Instance Management (Cloud Deployment)
+- Each organization/user needs their own Smithery.ai instance
+- Instances are isolated and have their own configuration
+- You can create multiple instances for different environments (dev, staging, prod)
+- Instance URLs follow the pattern: `https://<instance-name>.smithery.ai`
+
+### Post-Deployment
+- Local: Server runs on your machine at `http://localhost:3000`
+- Cloud: Server runs on Smithery at `https://<instance-name>.smithery.ai`
+- Monitor your deployment in the Smithery dashboard (cloud only)
+- Use the health check endpoint at `/health` to verify server status
+
+### Multi-User Setup
+For cloud deployment, if you need to share access with team members:
+1. Add team members to your Smithery.ai organization
+2. Grant them appropriate permissions for your instance
+3. Each team member can use the same instance URL but should configure their own:
+   - Database credentials
+   - Collection names
+   - Other environment-specific settings
+
+For local deployment:
+- Each user runs their own instance
+- Users need to configure their own environment variables
+- No shared access is possible unless you set up your own infrastructure
+
+## MCP Client Connection
+
+### Local Deployment Connection
+When running the server locally, MCP clients (like Cursor or Claude) can connect using the following configuration:
+
+#### Cursor AI IDE
+Update your `~/.cursor/mcp.json` or `.cursor/mcp.json`:
+```json
+{
+  "mcpServers": {
+    "wisdomforge": {
+      "url": "http://localhost:3000",
+      "type": "http"
+    }
+  }
+}
+```
+
+#### Claude Desktop
+Update your Claude settings:
+```json
+{
+  "processes": {
+    "knowledge_server": {
+      "url": "http://localhost:3000",
+      "type": "http"
+    }
+  },
+  "tools": [
+    {
+      "name": "store_knowledge",
+      "description": "Store domain-specific knowledge in a vector database",
+      "provider": "http",
+      "url": "http://localhost:3000"
+    },
+    {
+      "name": "retrieve_knowledge_context",
+      "description": "Retrieve relevant domain knowledge from a vector database",
+      "provider": "http",
+      "url": "http://localhost:3000"
+    }
+  ]
+}
+```
+
+### Connection Notes
+1. For local deployment:
+   - No authentication required
+   - Server must be running before clients can connect
+   - Use `http://localhost:3000` or your configured PORT
+   - HTTP server is enabled by default
+
+2. For cloud deployment:
+   - Authentication required via Smithery API key
+   - Server is always available
+   - Use `https://<instance-name>.smithery.ai`
+   - HTTP server is enabled by default
+   - Replace `<instance-name>` with your actual instance name
+   - Replace `<your-smithery-api-key>` with your actual Smithery API key
+
+3. Testing the Connection:
+   - Use the health check endpoint: `GET /health`
+   - Local: `http://localhost:3000/health`
+   - Cloud: `https://<instance-name>.smithery.ai/health`
 
 ## Usage
 
@@ -248,7 +424,3 @@ If you encounter issues:
 2. Verify your environment variables are correct
 3. Check Qdrant/Chroma connectivity
 4. Ensure your Qdrant instance is properly configured
-
-## License
-
-MIT

@@ -1,0 +1,40 @@
+{
+  "name": "wisdomforge",
+  "version": "1.0.0",
+  "type": "mcp-server",
+  "description": "A powerful knowledge management system that forges wisdom from experiences, insights, and best practices",
+  "main": "dist/index.js",
+  "entrypoint": "dist/src/index.js",
+  "runtime": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.8.0",
+    "@qdrant/js-client-rest": "^1.13.0"
+  },
+  "environment": {
+    "variables": [
+      "DATABASE_TYPE",
+      "COLLECTION_NAME",
+      "HTTP_SERVER",
+      "PORT",
+      "QDRANT_URL",
+      "QDRANT_API_KEY",
+      "CHROMA_URL"
+    ],
+    "defaults": {
+      "DATABASE_TYPE": "qdrant",
+      "HTTP_SERVER": "false",
+      "PORT": "3000"
+    }
+  },
+  "healthCheck": {
+    "path": "/health",
+    "interval": 30,
+    "timeout": 5
+  },
+  "scaling": {
+    "minInstances": 1,
+    "maxInstances": 3
+  }
+} 
