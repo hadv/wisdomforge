@@ -8,14 +8,6 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "typeRoots": ["./node_modules/@types", "./src/types/declarations"],
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"],
-      "@core/*": ["src/core/*"],
-      "@utils/*": ["src/utils/*"],
-      "@configs/*": ["src/configs/*"],
-      "@types/*": ["src/types/*"]
-    },
     "sourceMap": true
   },
   "include": ["./*.ts", "./src/**/*.ts", "./tests/**/*.ts", "./src/types/declarations/*.d.ts"],
