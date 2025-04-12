@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "description": "A powerful knowledge management system that forges wisdom from experiences, insights, and best practices",
   "main": "dist/index.js",
-  "bin": {
-    "wisdomforge": "./dist/index.js"
-  },
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",

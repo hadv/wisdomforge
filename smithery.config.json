@@ -4,7 +4,7 @@
   "type": "mcp-server",
   "description": "A powerful knowledge management system that forges wisdom from experiences, insights, and best practices",
   "main": "dist/index.js",
-  "entrypoint": "dist/src/index.js",
+  "entrypoint": "dist/index.js",
   "runtime": {
     "node": ">=18.0.0"
   },
