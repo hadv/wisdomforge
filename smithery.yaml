@@ -1,0 +1,46 @@
+# Smithery.ai configuration
+startCommand:
+  type: stdio
+  configSchema:
+    # JSON Schema defining the configuration options for the MCP.
+    type: object
+    properties:
+      database:
+        type: object
+        properties:
+          type:
+            type: string
+            enum: [qdrant, chroma]
+            default: qdrant
+          collectionName:
+            type: string
+            default: wisdomforge
+          apiKey:
+            type: string
+          url:
+            type: string
+    required: [database]
+  commandFunction:
+    # A function that produces the CLI command to start the MCP on stdio.
+    |-
+    (config) => ({
+      "command": "node",
+      "args": [
+        "dist/index.js"
+      ],
+      "env": {
+        "DATABASE_TYPE": config.database.type,
+        "COLLECTION_NAME": config.database.collectionName,
+        "QDRANT_API_KEY": config.database.apiKey,
+        "QDRANT_URL": config.database.url,
+        "HTTP_SERVER": "false",
+        "PORT": "3000"
+      }
+    })
+
+build:
+  dockerfile: Dockerfile
+  dockerBuildPath: .
+
+# Note: Qdrant service is not needed in cloud deployment
+# as it will be provided by Smithery's managed services 
