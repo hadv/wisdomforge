@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/hadv-wisdomforge-badge.png)](https://mseep.ai/app/hadv-wisdomforge)
+
 # WisdomForge
 
 [![smithery badge](https://smithery.ai/badge/@hadv/wisdomforge)](https://smithery.ai/server/@hadv/wisdomforge)
