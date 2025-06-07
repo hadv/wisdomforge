@@ -1,7 +1,5 @@
 # WisdomForge
 
-[![smithery badge](https://smithery.ai/badge/@hadv/wisdomforge)](https://smithery.ai/server/@hadv/wisdomforge)
-
 A powerful knowledge management system that forges wisdom from experiences, insights, and best practices. Built with Qdrant vector database for efficient knowledge storage and retrieval.
 
 ## Features
