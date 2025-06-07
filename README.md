@@ -71,20 +71,11 @@ npm run build
 Add this configuration to your `~/.cursor/mcp.json` or `.cursor/mcp.json` file:
 ```json
 {
-  "mcpServers": {
+  "mcpServers": { 
     "wisdomforge": {
-      "command": "npx",
+      "command": "/bin/zsh",
       "args": [
-        "-y",
-        "@smithery/cli@latest",
-        "run",
-        "@hadv/wisdomforge",
-        "--key",
-        "YOUR_API_KEY",
-        "--config",
-        "{\"database\":{\"type\":\"qdrant\",\"collectionName\":\"YOUR_COLLECTION_NAME\",\"url\":\"YOUR_QDRANT_URL\",\"apiKey\":\"YOUR_QDRANT_API_KEY\"}}",
-        "--transport",
-        "ws"
+        "/path/to/wisdomforge/run-wisdomforge-mcp.sh"
       ]
     }
   }
